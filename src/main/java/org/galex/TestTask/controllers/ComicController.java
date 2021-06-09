@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.net.NetworkInterface;
 import java.util.ArrayList;
@@ -94,10 +95,15 @@ public class ComicController {
             @ApiResponse(
                     responseCode = "409",
                     description = "Comic with same id already exists"
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Provided entity not valid"
             )
     }
     )
-    public ResponseEntity<ComicEntity> addComic(@RequestBody @Valid ComicEntity comic) {
+    public ResponseEntity<ComicEntity> addComic(@RequestBody @Valid ComicEntity comic,
+                                                HttpServletRequest httpServletRequest) {
         if (!comicRepository.existsById(comic.getId())) {
             if (!Objects.isNull(comic.getCharacters())) {
                 comic.getCharacters().removeIf(id -> !characterRepository.existsById(id));
@@ -112,7 +118,8 @@ public class ComicController {
                     characterRepository.save(character);
                 }
             }
-            comic.setResourceURI("http://localhost:8080/v1/public/comics/" + comic.getId());
+            comic.setResourceURI(httpServletRequest.getScheme() + "://" + httpServletRequest.getServerName()
+                    + ":" + httpServletRequest.getServerPort() + "/v1/public/comics/" + comic.getId());
             comicRepository.save(comic);
             return new ResponseEntity<>(comic, HttpStatus.CREATED);
         }
@@ -133,6 +140,10 @@ public class ComicController {
             @ApiResponse(
                     responseCode = "404",
                     description = "Comic with provided id not found"
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Provided entity not valid"
             )
     }
     )

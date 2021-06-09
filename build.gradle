@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'org.galex'
-version = '0.0.1-SNAPSHOT'
+version = '1.0.0'
 sourceCompatibility = '11'
 
 configurations {
@@ -31,4 +31,8 @@ dependencies {
 
 test {
 	useJUnitPlatform()
+}
+
+bootJar {
+	archiveFileName = "TestTask.jar"
 }

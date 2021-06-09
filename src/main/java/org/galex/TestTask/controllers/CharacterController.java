@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.Objects;
@@ -93,10 +94,15 @@ public class CharacterController {
             @ApiResponse(
                     responseCode = "409",
                     description = "Character with same id already exists"
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Provided entity not valid"
             )
     }
     )
-    public ResponseEntity<CharacterEntity> addCharacter(@RequestBody @Valid CharacterEntity character) {
+    public ResponseEntity<CharacterEntity> addCharacter(@RequestBody @Valid CharacterEntity character,
+                                                        HttpServletRequest httpServletRequest) {
         if (!characterRepository.existsById(character.getId())) {
             if (!Objects.isNull(character.getComics())) {
                 character.getComics().removeIf(id -> !comicRepository.existsById(id));
@@ -111,7 +117,8 @@ public class CharacterController {
                     comicRepository.save(comic);
                 }
             }
-            character.setResourceURI("http://localhost:8080/v1/public/characters/" + character.getId());
+            character.setResourceURI(httpServletRequest.getScheme() + "://" + httpServletRequest.getServerName()
+                    + ":" + httpServletRequest.getServerPort() + "/v1/public/characters/" + character.getId());
             characterRepository.save(character);
             return new ResponseEntity<>(character, HttpStatus.CREATED);
         }
@@ -132,6 +139,10 @@ public class CharacterController {
             @ApiResponse(
                     responseCode = "404",
                     description = "Character with provided id not found"
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Provided entity not valid"
             )
     }
     )
