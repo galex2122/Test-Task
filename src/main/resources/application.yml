@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: TestTask
+  data:
+    mongodb:
+      username: admin
+      password: admin
+      host: localhost
+      port: 27017
+      database: marveldb
+      authentication-database: admin
