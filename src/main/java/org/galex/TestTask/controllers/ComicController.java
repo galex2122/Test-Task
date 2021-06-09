@@ -1,5 +1,9 @@
 package org.galex.TestTask.controllers;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import org.galex.TestTask.models.CharacterEntity;
 import org.galex.TestTask.models.ComicEntity;
@@ -12,10 +16,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.net.NetworkInterface;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Optional;
 
+@Tag(name = "Comics", description = "Interacting with comics")
 @RestController
 @RequestMapping(value = "/v1/public/comics")
 @AllArgsConstructor
@@ -24,34 +30,73 @@ public class ComicController {
     private final ComicRepository comicRepository;
     private final CharacterRepository characterRepository;
 
+    @Operation(
+            summary = "Search comics",
+            description = "Returns page of comics which can be sorted and filtered"
+    )
     @RequestMapping(value = "", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
+    @ApiResponse(
+            responseCode = "200",
+            description = "Returned page of comics, may be empty"
+    )
     public ResponseEntity<Page<ComicEntity>> findComics(Pageable pageable,
                                                         @RequestParam("title") Optional<String> title,
                                                         @RequestParam("titleStartsWith") Optional<String> start) {
 
         return title.map(t -> new ResponseEntity<>(comicRepository
-                        .findByTitleStartsWithAndTitle(start.orElse(""), t, pageable), HttpStatus.OK))
+                .findByTitleStartsWithAndTitle(start.orElse(""), t, pageable), HttpStatus.OK))
                 .orElseGet(() -> new ResponseEntity<>(comicRepository
                         .findByTitleStartsWith(start.orElse(""), pageable), HttpStatus.OK));
     }
 
+    @Operation(
+            summary = "Search comic by id",
+            description = "Returns page with comic that contains provided id if it exists, otherwise returns a blank page"
+    )
     @RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
+    @ApiResponse(
+            responseCode = "200",
+            description = "Returned page with comic, may be empty"
+    )
     public ResponseEntity<Page<ComicEntity>> findComicById(Pageable pageable,
                                                            @PathVariable(value = "id") String id) {
         return new ResponseEntity<>(comicRepository.findById(id, pageable), HttpStatus.OK);
     }
 
+    @Operation(
+            summary = "Search characters of comic",
+            description = "Returns page of characters, whose ids are present in comic. Page can be sorted and filtered"
+    )
     @RequestMapping(value = "/{id}/characters", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
+    @ApiResponse(
+            responseCode = "200",
+            description = "Returned page with characters, may be empty"
+    )
     public ResponseEntity<Page<CharacterEntity>> findComicCharacters(Pageable pageable,
                                                                      @PathVariable(value = "id") String id) {
         return new ResponseEntity<>(characterRepository.findByComics(id, pageable), HttpStatus.OK);
     }
 
+    @Operation(
+            summary = "Add new comic",
+            description = "Allows adding new comic entity to database"
+    )
     @RequestMapping(value = "/add", method = RequestMethod.POST, consumes = "application/json")
     @ResponseBody
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "201",
+                    description = "Comic created"
+            ),
+            @ApiResponse(
+                    responseCode = "409",
+                    description = "Comic with same id already exists"
+            )
+    }
+    )
     public ResponseEntity<ComicEntity> addComic(@RequestBody @Valid ComicEntity comic) {
         if (!comicRepository.existsById(comic.getId())) {
             if (!Objects.isNull(comic.getCharacters())) {
@@ -69,14 +114,29 @@ public class ComicController {
             }
             comic.setResourceURI("http://localhost:8080/v1/public/comics/" + comic.getId());
             comicRepository.save(comic);
-            return new ResponseEntity<>(HttpStatus.CREATED);
+            return new ResponseEntity<>(comic, HttpStatus.CREATED);
         }
         return new ResponseEntity<>(HttpStatus.CONFLICT);
     }
 
+    @Operation(
+            summary = "Update existing comic",
+            description = "Allows to update already existing in database comic entity"
+    )
     @RequestMapping(value = "/update", method = RequestMethod.PUT, consumes = "application/json")
     @ResponseBody
-    public ResponseEntity<String> updateComic(@RequestBody @Valid ComicEntity comic) {
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Comic updated"
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Comic with provided id not found"
+            )
+    }
+    )
+    public ResponseEntity<ComicEntity> updateComic(@RequestBody @Valid ComicEntity comic) {
         if (comicRepository.existsById(comic.getId())) {
             if (!Objects.isNull(comic.getCharacters())) {
                 comic.getCharacters().removeIf(id -> !characterRepository.existsById(id));
@@ -103,7 +163,7 @@ public class ComicController {
             }
             comic.setResourceURI(comicRepository.findById(comic.getId()).get().getResourceURI());
             comicRepository.save(comic);
-            return new ResponseEntity<>(HttpStatus.OK);
+            return new ResponseEntity<>(comic, HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
