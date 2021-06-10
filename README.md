@@ -4,4 +4,5 @@
 * `./buildAndCompose` to build sources and docker compose
 * `docker-compose up` to run
 
-### Swagger API documentation available at `<host:port>/swagger-ui.html`
+### Specs a located at `/specs/spec.yml`
+### Swagger UI available at `localhost:8080/swagger-ui.html`

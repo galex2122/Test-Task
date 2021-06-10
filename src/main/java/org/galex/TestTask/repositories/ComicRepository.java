@@ -11,8 +11,12 @@ import java.util.Optional;
 @Repository
 public interface ComicRepository extends MongoRepository<ComicEntity, String> {
     Page<ComicEntity> findById(String id, Pageable pageable);
+
     Optional<ComicEntity> findById(String id);
+
     Page<ComicEntity> findByTitleStartsWith(String title, Pageable pageable);
+
     Page<ComicEntity> findByTitleStartsWithAndTitle(String start, String title, Pageable pageable);
+
     Page<ComicEntity> findByCharacters(String charId, Pageable pageable);
 }

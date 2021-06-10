@@ -1,0 +1,467 @@
+openapi: 3.0.1
+info:
+  title: TestTask API
+  contact:
+    name: Gerasimov Alexey
+    email: Gerasimov2122@icloud.com
+  version: 1.0.0
+servers:
+  - url: 'http://localhost:8080'
+    description: Generated server url
+tags:
+  - name: Comics
+    description: Interacting with comics
+  - name: Characters
+    description: Interacting with characters
+paths:
+  /v1/public/comics/update:
+    put:
+      tags:
+        - Comics
+      summary: Update existing comic
+      description: Allows to update already existing in database comic entity
+      operationId: updateComic
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ComicEntity'
+        required: true
+      responses:
+        '200':
+          description: Comic updated
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ComicEntity'
+        '400':
+          description: Provided entity not valid
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ComicEntity'
+        '404':
+          description: Comic with provided id not found
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ComicEntity'
+  /v1/public/characters/update:
+    put:
+      tags:
+        - Characters
+      summary: Update existing character
+      description: Allows to update already existing in database character entity
+      operationId: updateCharacter
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CharacterEntity'
+        required: true
+      responses:
+        '200':
+          description: Character updated
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/CharacterEntity'
+        '400':
+          description: Provided entity not valid
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/CharacterEntity'
+        '404':
+          description: Character with provided id not found
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/CharacterEntity'
+  /v1/public/comics/add:
+    post:
+      tags:
+        - Comics
+      summary: Add new comic
+      description: Allows adding new comic entity to database
+      operationId: addComic
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ComicEntity'
+        required: true
+      responses:
+        '201':
+          description: Comic created
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ComicEntity'
+        '400':
+          description: Provided entity not valid
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ComicEntity'
+        '409':
+          description: Comic with same id already exists
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ComicEntity'
+  /v1/public/characters/add:
+    post:
+      tags:
+        - Characters
+      summary: Add new character
+      description: Allows adding new character entity to database
+      operationId: addCharacter
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CharacterEntity'
+        required: true
+      responses:
+        '201':
+          description: Character created
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/CharacterEntity'
+        '400':
+          description: Provided entity not valid
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/CharacterEntity'
+        '409':
+          description: Character with same id already exists
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/CharacterEntity'
+  /v1/public/comics:
+    get:
+      tags:
+        - Comics
+      summary: Search comics
+      description: Returns page of comics which can be sorted and filtered
+      operationId: findComics
+      parameters:
+        - name: pageable
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/Pageable'
+        - name: title
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: titleStartsWith
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 'Returned page of comics, may be empty'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageComicEntity'
+  '/v1/public/comics/{id}':
+    get:
+      tags:
+        - Comics
+      summary: Search comic by id
+      description: >-
+        Returns page with comic that contains provided id if it exists,
+        otherwise returns a blank page
+      operationId: findComicById
+      parameters:
+        - name: pageable
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/Pageable'
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 'Returned page with comic, may be empty'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageComicEntity'
+  '/v1/public/comics/{id}/characters':
+    get:
+      tags:
+        - Comics
+      summary: Search characters of comic
+      description: >-
+        Returns page of characters, whose ids are present in comic. Page can be
+        sorted and filtered
+      operationId: findComicCharacters
+      parameters:
+        - name: pageable
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/Pageable'
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 'Returned page with characters, may be empty'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageCharacterEntity'
+  /v1/public/characters:
+    get:
+      tags:
+        - Characters
+      summary: Search characters
+      description: Returns page of characters which can be sorted and filtered
+      operationId: findCharacters
+      parameters:
+        - name: pageable
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/Pageable'
+        - name: name
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: nameStartsWith
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 'Returned page of characters, may be empty'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageCharacterEntity'
+  '/v1/public/characters/{id}':
+    get:
+      tags:
+        - Characters
+      summary: Search character by id
+      description: >-
+        Returns page with character that contains provided id if it exists,
+        otherwise returns a blank page
+      operationId: findCharacterById
+      parameters:
+        - name: pageable
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/Pageable'
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 'Returned page with character, may be empty'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageCharacterEntity'
+  '/v1/public/characters/{id}/comics':
+    get:
+      tags:
+        - Characters
+      summary: Search comics with this character
+      description: >-
+        Returns page of comics, whose ids are present in character. Page can be
+        sorted and filtered
+      operationId: findCharacterComics
+      parameters:
+        - name: pageable
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/Pageable'
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 'Returned page with comics, may be empty'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageComicEntity'
+components:
+  schemas:
+    ComicEntity:
+      required:
+        - id
+        - title
+      type: object
+      properties:
+        id:
+          type: string
+          description: 'Id of comic entity, cannot be blank'
+        title:
+          type: string
+          description: 'Title of comic, cannot be blank'
+        description:
+          type: string
+          description: 'Description of comic, optional'
+        resourceURI:
+          type: string
+          description: 'URI of entity inside API, created automatically'
+        characters:
+          type: array
+          description: 'Id of character which is present in this comic, optional'
+          items:
+            type: string
+            description: 'Id of character which is present in this comic, optional'
+        thumbnail:
+          type: string
+          description: 'URL of thumbnail of this comic, optional'
+        images:
+          type: array
+          description: 'URL of picture of this comic, optional'
+          items:
+            type: string
+            description: 'URL of picture of this comic, optional'
+      description: Comic entity
+    CharacterEntity:
+      required:
+        - id
+        - name
+      type: object
+      properties:
+        id:
+          type: string
+          description: 'Id of character entity, cannot be blank'
+        name:
+          type: string
+          description: 'Name of character, cannot be blank'
+        description:
+          type: string
+          description: 'Description of character, optional'
+        thumbnail:
+          type: string
+          description: 'URL of thumbnail of this character, optional'
+        comics:
+          type: array
+          description: 'Id of comic in which this character is present, optional'
+          items:
+            type: string
+            description: 'Id of comic in which this character is present, optional'
+        resourceURI:
+          type: string
+          description: 'URI of entity inside API, created automatically'
+      description: Comic character entity
+    Pageable:
+      type: object
+      properties:
+        pageNumber:
+          type: integer
+          format: int32
+        pageSize:
+          type: integer
+          format: int32
+        sort:
+          $ref: '#/components/schemas/Sort'
+        paged:
+          type: boolean
+        unpaged:
+          type: boolean
+        offset:
+          type: integer
+          format: int64
+    Sort:
+      type: object
+      properties:
+        sorted:
+          type: boolean
+        unsorted:
+          type: boolean
+        empty:
+          type: boolean
+    PageComicEntity:
+      type: object
+      properties:
+        totalPages:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
+        pageable:
+          $ref: '#/components/schemas/Pageable'
+        first:
+          type: boolean
+        sort:
+          $ref: '#/components/schemas/Sort'
+        last:
+          type: boolean
+        numberOfElements:
+          type: integer
+          format: int32
+        size:
+          type: integer
+          format: int32
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/ComicEntity'
+        number:
+          type: integer
+          format: int32
+        empty:
+          type: boolean
+    PageCharacterEntity:
+      type: object
+      properties:
+        totalPages:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
+        pageable:
+          $ref: '#/components/schemas/Pageable'
+        first:
+          type: boolean
+        sort:
+          $ref: '#/components/schemas/Sort'
+        last:
+          type: boolean
+        numberOfElements:
+          type: integer
+          format: int32
+        size:
+          type: integer
+          format: int32
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/CharacterEntity'
+        number:
+          type: integer
+          format: int32
+        empty:
+          type: boolean
